@@ -1,0 +1,160 @@
+Learn Make Guide: https://www.gnu.org/software/make/manual/make.html#Overview
+
+Overview:
+
+#1
+    Variables:
+    target: dependencies
+    <TAB>command
+
+    Example:
+    CXX = g++
+    CXXFLAGS = -Wall -Wextra -std=c++17 -Isrc
+    TARGET = app.exe
+    BUILD_DIR = build
+
+    Why variables?
+
+    Change compiler once
+
+    Add flags safely
+
+    Easier to read & edit later
+
+#2
+    Directory Operations:
+
+    SRCS = main.cpp $(wildcard src/*.cpp)
+
+    What is wildcard?
+
+    Asks make: “give me all .cpp files in src/”
+
+#3
+    Output:
+    .cpp → .o → .exe
+
+    OBJS = $(BUILD_DIR)/main.o \
+        $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(wildcard src/*.cpp))
+
+    Example:
+    src/foo.cpp → build/foo.o
+
+#4
+    Target:
+
+    all: $(TARGET)
+
+    The first target is the default.
+
+    So:
+
+    mingw32-make
+
+
+    means:
+
+    mingw32-make all
+
+#5
+    Linking:
+
+    $(TARGET): $(OBJS)
+        $(CXX) $(CXXFLAGS) -o $@ $(OBJS)
+
+    Automatic variables
+    Variable	Meaning
+    $@	target name (app.exe)
+    $<	first dependency
+    $^	all dependencies
+
+    You can rewrite as:
+
+    g++ -o app.exe build/main.o build/foo.o ...
+
+#6 
+    Hidden Rule:
+
+    $(BUILD_DIR):
+        if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+
+#7
+    main.cpp
+    $(BUILD_DIR)/main.o: main.cpp | $(BUILD_DIR)
+        $(CXX) $(CXXFLAGS) -c $< -o $@
+
+    src files
+    $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
+        $(CXX) $(CXXFLAGS) -c $< -o $@
+
+    The vertical bar |
+
+    This means:
+
+    “build/ must exist, but don’t rebuild if it changes.”
+
+    This is advanced make, and you’re already using it.
+
+#8 
+    Cleaning
+
+    clean:
+	del /Q $(BUILD_DIR)\*.o $(TARGET)
+
+    Special targets like clean:
+
+    don’t produce files
+
+    are manually invoked
+
+Run: 
+    How to experiment safely
+    1️⃣ Dry run (no execution)
+    mingw32-make -n
+
+    2️⃣ Debug make logic
+    mingw32-make --debug=b
+
+    3️⃣ Print variables
+    print:
+        @echo SRCS=$(SRCS)
+        @echo OBJS=$(OBJS)
+
+
+    Run:
+
+    mingw32-make print
+
+Clues: 
+    🧩 How to modify it yourself (cheat sheet)
+    Add another source folder
+    SRCS += $(wildcard lib/*.cpp)
+
+    Add optimization
+    CXXFLAGS += -O2
+
+    Debug build
+    CXXFLAGS += -g
+
+    Change output name
+    TARGET = myprogram.exe
+
+    🏁 Mental Model (important)
+
+    Think in graphs, not scripts:
+
+    main.cpp ──▶ main.o ─┐
+    foo.cpp  ──▶ foo.o  ├─▶ app.exe
+    bar.cpp  ──▶ bar.o  ┘
+
+
+    Make only rebuilds what changed.
+
+
+
+
+
+
+
+
+
