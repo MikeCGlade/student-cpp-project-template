@@ -28,5 +28,8 @@ $(BUILD_DIR)/main.o: main.cpp | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# phony prevents a file named clean from confusing make
+.PHONY : clean
 clean:
 	del /Q $(BUILD_DIR)\*.o $(TARGET)
+
