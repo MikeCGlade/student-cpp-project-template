@@ -1,13 +1,11 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++20 -Isrc
+CXXFLAGS = -Wall -Wextra -std=c++20 -Isrc -I../include -MMD -MP
 TARGET = app.exe
 BUILD_DIR = build
 
 SRCS = main.cpp $(wildcard src/*.cpp)
 
-# Convert:
-# main.cpp      -> build/main.o
-# src/foo.cpp   -> build/foo.o
+# Object files
 OBJS = $(BUILD_DIR)/main.o \
        $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(wildcard src/*.cpp))
 
@@ -24,12 +22,13 @@ $(BUILD_DIR):
 $(BUILD_DIR)/main.o: main.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# src/foo.cpp -> build/foo.o
+# src/*.cpp -> build/*.o
 $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# phony prevents a file named clean from confusing make
-.PHONY : clean
-clean:
-	del /Q $(BUILD_DIR)\*.o $(TARGET)
+# Include dependencies (headers in ../include or src/)
+-include $(OBJS:.o=.d)
 
+.PHONY: clean
+clean:
+	del /Q $(BUILD_DIR)\*.o $(BUILD_DIR)\*.d $(TARGET)
