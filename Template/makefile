@@ -81,11 +81,23 @@ $(BINDIR)/%.o: $(SRCDIR)/%.cpp | $(BINDIR)
 # ======================
 # Ensure directories exist (cross-platform)
 # ======================
+ifeq ($(OS),Windows_NT)
+
 $(BINDIR):
 	@if not exist "$(BINDIR)" mkdir "$(BINDIR)"
 
 $(LIBDIR):
 	@if not exist "$(LIBDIR)" mkdir "$(LIBDIR)"
+
+else
+
+$(BINDIR):
+	mkdir -p $(BINDIR)
+
+$(LIBDIR):
+	mkdir -p $(LIBDIR)
+
+endif
 
 # ======================
 # Include header dependencies
