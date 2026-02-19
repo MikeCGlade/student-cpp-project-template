@@ -25,14 +25,14 @@ else
 endif
 
 # Directories
-SRCDIR = src
-INCDIR = include
-BINDIR = bin
-LIBDIR = lib
+SRCDIR = source
+INCDIR = include_headers
+BINDIR = student_binaries
+LIBDIR = libraries
 
 # Package stuff
 HWNUM = HW2
-TARNAME = first_last
+TARNAME = user_name
 
 # Output files
 EXENAME = app$(EXE_EXT)
@@ -98,6 +98,10 @@ $(LIBDIR):
 
 endif
 
+#Test files necessary for grader:
+test: test.cpp $(HWNUM).a
+	$(CC) $(CXXFLAGS) -o test.exe $<
+
 # Include header dependencies
 -include $(OBJ:.o=.d)
 
@@ -105,6 +109,7 @@ endif
 clean:
 	$(RM) $(BINDIR)
 	$(RM_FILE) $(EXENAME) $(LIBNAME)
+	$(RM_FILE) *.tar
 
 # Create tarball including everything
 exe_package:
@@ -115,10 +120,13 @@ exe_package:
 
 # Create tarball excluding main.cpp
 lib_package:
+	cp $(INCDIR)/*.h .
 	tar -cf $(HWNUM)_$(TARNAME).tar \
 		Makefile \
 		$(filter-out $(SRCDIR)/main.cpp, $(SRC)) \
-		$(wildcard $(INCDIR)/*.h)
+		$(wildcard $(INCDIR)/*.h) \
+		*.h
+	rm -f *.h
 
 # Phony targets
-.PHONY: all exe library clean exe_package lib_package
+.PHONY: all exe library clean exe_package lib_package test
